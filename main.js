@@ -105,6 +105,7 @@ const updateCount = async (id, url) => {
       console.log('Cannot update click. Click limit reached.');
       return false;
     }
+    return 
   } catch (error) {
     console.error('Error while updating click:', error);
     return false;
@@ -138,9 +139,7 @@ const insertItemsToTable=async (tablename,values)=>{
 const insertingDataToTables=async (tablename,values)=>{
   let sql="";
   if (tablename == "fileuploaddetails") {
-    console.log(140, 'count')
       sql = 'INSERT INTO fileuploaddetails (emails, filename,fileuploadeddate,fileurl,id) VALUES (?, ?, ?,?,?)';
-     console.log(142, 'count') 
     pool.query(sql, [values.emails, values.filename, values.fileuploadeddate, values.fileurl, values.id], (err, results) => {
       if (err) {
            console.log(145, 'count')
@@ -197,7 +196,7 @@ app.post('/api/upload', upload.single('file') , async (req, res) => {
       },
     });
 
-    const message = 'Please click on the link provided to download your file:'+ `http://3.135.206.171/fetch/id=${randomId}_url${fileUrl.split(".com")[1].replace(/^\/+/, '')}`;
+    const message = 'Please click on the link provided to download your file:'+ `http://localhost:4200/fetch/id=${randomId}_url${fileUrl.split(".com")[1].replace(/^\/+/, '')}`;
     const snsPublishParams = {
       TopicArn: topicArn,
       Message: message,
