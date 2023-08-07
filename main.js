@@ -86,7 +86,8 @@ const updateCount = async (id, url) => {
   const selectSql = 'SELECT emails, id, count FROM fileclickcount WHERE id = ?';
   console.log(id, 'count')
   try {
-    const [rows] = await pool.query(selectSql, [id]);
+    const rows = await pool.query(selectSql, [id]);
+    console.log(rows, 'rowsrowsrows')
     if (rows.length === 0) {
       console.log('No data found for the given ID.');
       return false;
