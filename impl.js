@@ -2,12 +2,12 @@ const aws = require('aws-sdk');
 const sns = new aws.SNS();
 const pool = require('./db'); 
 const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
-const bucket_name = 'smaremal'
-const lamdaFunName = 'smaremal'
-const topicName = 'smaremal'
+const bucket_name = 'smalempabucket'
+const lamdaFunName = 'smalempa' 
+const topicName = 'smalempatopic'
 let awsAcessObj = {
-   accessKeyId: 'AKIA4WNIZPNFFJXFIUVX',   
-  secretAccessKey: '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',
+    accessKeyId: 'AKIAUPCKTHUGWACQ2HXD',   
+  secretAccessKey: '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',
   region: 'us-east-2',             
 } 
 aws.config.update(awsAcessObj);
@@ -123,7 +123,7 @@ exports.upload = async (req, res) => {
 
     const response = JSON.parse(data.Payload);
     let randomId = generateUniqueId()
-    const topicArn = 'arn:aws:sns:us-east-2:872769223498:smaremal';
+    const topicArn = 'arn:aws:sns:us-east-2:307246611725:smalempatopic';
     const userEmails = await getSubscribedUsers(topicArn);
      const downloadUrl = JSON.parse(response.body).downloadUrl; 
     insertItemsToTable('file_upload_list', {id:randomId, emails:userEmails.join(','), file_name:req.file.originalname, uploaded_date:new Date(), file_url: JSON.parse(response.body).downloadUrl})
@@ -133,7 +133,7 @@ exports.upload = async (req, res) => {
       region: "us-east-2", 
       credentials: { accessKeyId,secretAccessKey}
     });
-    const message = 'Your file is ready to download:'+ `http://18.117.254.6/download/token=${randomId}_path_${downloadUrl.split(".com")[1].replace(/^\/+/, '')}`;
+    const message = 'Your file is ready to download:'+ `http://3.135.206.171/download/token=${randomId}_path_${downloadUrl.split(".com")[1].replace(/^\/+/, '')}`;
     const snsPublishParams = {
       TopicArn: topicArn,
       Message: message,

@@ -10,12 +10,12 @@ app.use(bodyParser.json());
 app.use(cors());
 const pool = require('./db'); 
 let awsAcessObj = {
-  accessKeyId: 'AKIA4WNIZPNFFJXFIUVX',   
-  secretAccessKey: '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', 
+   accessKeyId: 'AKIAUPCKTHUGWACQ2HXD',   
+  secretAccessKey: '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',
   region: 'us-east-2',             
 }
-const bucket_name = 'smaremal'
-const lamdaFunName = 'smaremal'
+const bucket_name = 'smalempabucket'
+const lamdaFunName = 'smalempa'
 aws.config.update(awsAcessObj);
 const impl = require('./impl')
 
@@ -109,7 +109,6 @@ app.post('/api/send/subscriptions', async (req, res) => {
 
 app.post('/api/countClicks', async (req, res) => {
   try {
-    console.log('click')
     const { userId, url } = req.body;
 
     const updateSuccessful = await updateClick(userId, url);
