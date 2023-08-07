@@ -206,10 +206,10 @@ app.post('/api/upload', upload.single('file') , async (req, res) => {
     await snsClient.send(new PublishCommand(snsPublishParams));
     console.log('A file link has been sent to the subscribed users successfully.');
    
-    res.status(200).json({ success: true, message: 'File has been uploaded to S3 successfully' });
+    return res.status(200).json({ success: true, message: 'File has been uploaded to S3 successfully' });
   } catch (error) {
     console.error('Upload failed:', error);
-    res.status(500).json({ success: false, message: 'Upload failed' });
+    return res.status(500).json({ success: false, message: 'Upload failed' });
   }
 });
 
