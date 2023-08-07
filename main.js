@@ -81,11 +81,12 @@ const subscribedUsers = async (topicArn) => {
 };
 const updateCount = async (id, url) => {
   const selectSql = 'SELECT emails, id, count FROM fileclickcount WHERE id = ?';
-
+let result = false
   try {
     const [rows] = await pool.query(selectSql, [id]);
     if (rows.length === 0) {
       console.log('For the given Id no data is found.');
+      result = false
       return false;
     }
 
@@ -95,16 +96,20 @@ const updateCount = async (id, url) => {
       const updateSql = 'UPDATE fileclickcount SET count = count + 1 WHERE id = ?';
       await pool.query(updateSql, [id]);
       console.log('The count updated successfully.');
+      result = true
       return true;
     } else {
       file_deletion_exceeds_count(url)
       console.log('The count limit has reached, cannot update the count.');
+      result = false
       return false;
     }
   } catch (error) {
     console.error('While updated count, error is encountered:', error);
+    result = false
     return false;
   }
+  return result
 };
 
 const InsertionSqlCommands = async (tbl, values) => {
