@@ -5,7 +5,6 @@ const nodemailer = require('nodemailer');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const router = express.Router();
 const app = express();
 const { v4: uuidv4 } = require('uuid');
 const randomUUID = uuidv4();
@@ -17,7 +16,6 @@ aws.config.update({
   secretAccessKey: '7s1lIBsPgvIh+eXPUwD81ADKzehEbNTJcbhFM+lW', 
   region: 'us-east-2',             
 });
-const AppPath="http://3.135.206.171/fetch"
 const sns = new aws.SNS();
 const lambda = new aws.Lambda();
 const upload = multer();
@@ -81,12 +79,11 @@ const subscribedUsers = async (topicArn) => {
 };
 const updateCount = async (id, url) => {
   const selectSql = 'SELECT emails, id, count FROM fileclickcount WHERE id = ?';
-let result = false
+
   try {
     const [rows] = await pool.query(selectSql, [id]);
     if (rows.length === 0) {
       console.log('For the given Id no data is found.');
-      result = false
       return false;
     }
 
@@ -96,64 +93,43 @@ let result = false
       const updateSql = 'UPDATE fileclickcount SET count = count + 1 WHERE id = ?';
       await pool.query(updateSql, [id]);
       console.log('The count updated successfully.');
-      result = true
       return true;
     } else {
       file_deletion_exceeds_count(url)
       console.log('The count limit has reached, cannot update the count.');
-      result = false
       return false;
     }
   } catch (error) {
     console.error('While updated count, error is encountered:', error);
-    result = false
     return false;
   }
-  return result
 };
 
-const InsertionSqlCommands = async (tbl, values) => {
-  let sql = "";
-  let queryParams = [];
+const insertingDataToTables=async (tablename,values)=>{
+  let sql="";
+  if(tablename=="fileuploaddetails"){
+      sql = 'INSERT INTO fileuploaddetails (emails, filename,fileuploadeddate,fileurl,id) VALUES (?, ?, ?,?,?)';
+      pool.query(sql, [values.id, values.filename, values.fileuploadeddate,values.fileurl,values.id], (err, results) => {
+        if (err) {
+          return console.error('Encountered error while inserting data:', err);
+          } else {
+            return console.log('Successfully data got inserted:', results);
+          }
+       }) 
+    } 
+      else if(tablename=="fileclickcount"){
+      sql = 'INSERT INTO fileclickcount (emails, fileurl, count, id) VALUES (?, ?, ?,?)';
+      pool.query(sql, [values.emails, values.fileurl,0, values.id], (err, results) => {
+        if (err) {
+          return console.error('Encountered error while inserting data:', err);
+          } else {
+            return console.log('Successfully data got inserted:', results);
+          }
+       }) 
+  }
   
-  switch (tbl) {
-    case "fileuploaddetails":
-      sql = 'INSERT INTO fileuploaddetails (emails, filename, fileuploadeddate, fileurl, id) VALUES (?, ?, ?, ?, ?)';
-      queryParams = [values.emails, values.filename, values.fileuploadeddate, values.fileurl, values.id];
-      break;
-    case "fileclickcount":
-      sql = 'INSERT INTO fileclickcount (emails, fileurl, count, id) VALUES (?, ?, ?, ?)';
-      queryParams = [values.emails, values.fileurl, 0, values.id];
-      break;
-    default:
-      throw new Error(`Invalid tbl: ${tbl}`);
-  }
-
-  try {
-    const results = await pool.query(sql, queryParams);
-    console.log('Successfully data got inserted:', results);
-  } catch (err) {
-    console.error('Encountered error while inserting data:', err);
-  }
-};
-
-async function InsertDataToTables(userEmails, fileUrl, randomId, originalname) {
-//   let tblData = {
-//     'fileclickcount': { emails: userEmails.join(','), fileurl: fileUrl, count: 0, id: randomId },
-//     'fileuploaddetails':{ emails: userEmails.join(','), filename: originalname, fileuploadeddate: new Date(), fileurl: fileUrl, id: randomId };
-
-//  }
-  const fileClickObj = { emails: userEmails.join(','), fileurl: fileUrl, count: 0, id: randomId };
-  const fileuploaddetails = { emails: userEmails.join(','), filename: originalname, fileuploadeddate: new Date(), fileurl: fileUrl, id: randomId };
-
-  try {
-    await InsertionSqlCommands('fileclickcount', fileClickObj);
-    await InsertionSqlCommands('fileuploaddetails', fileuploaddetails);
-  } catch (error) {
-    console.error('Error inserting data to tables:', error);
-    throw error;
-  }
 }
+
 app.post('/api/upload', upload.single('file') , async (req, res) => {
  try {
   if (!req.file) {
@@ -174,15 +150,9 @@ app.post('/api/upload', upload.single('file') , async (req, res) => {
   let randomId = new Date().getDate().toString(36)+new Date().getTime().toString(36)
     const topicArn = 'arn:aws:sns:us-east-2:307246611725:smalempatopic';
     const userEmails = await subscribedUsers(topicArn);
-   const fileUrl = JSON.parse(response.body).fileUrl; 
-   let tableData = {
-     'fileclickcount': { emails: userEmails.join(','), fileurl: JSON.parse(response.body).fileUrl, count: 0, id: randomId },
-     'fileuploaddetails':{ emails:userEmails.join(','), filename:req.file.originalname, fileuploadeddate:new Date(), fileurl: JSON.parse(response.body).fileUrl,id:randomId}
-   }
-   Object.keys(tableData).forEach((key) => {
-    InsertionSqlCommands(key, tableData[key])
-  })
-  
+     const fileUrl = JSON.parse(response.body).fileUrl; 
+    insertingDataToTables('fileuploaddetails', { emails:userEmails.join(','), filename:req.file.originalname, fileuploadeddate:new Date(), fileurl: JSON.parse(response.body).fileUrl,id:randomId})
+    insertingDataToTables('fileclickcount', {emails:userEmails.join(','),  fileurl: JSON.parse(response.body).fileUrl, count: 0,id:randomId})
     const snsClient = new SNSClient({
       region: "us-east-2", 
       credentials: {
@@ -190,8 +160,7 @@ app.post('/api/upload', upload.single('file') , async (req, res) => {
         secretAccessKey: "7s1lIBsPgvIh+eXPUwD81ADKzehEbNTJcbhFM+lW",
       },
     });
-   const fileUrlFinal = fileUrl.split(".com")[1].replace(/^\/+/, '')
-    const message = 'Please click on the link provided to download your file:'+ `${AppPath}/id=${randomId}_url${fileUrlFinal}`;
+    const message = 'Please click on the link provided to download your file:'+ `http://localhost:4200/fetch/id=${randomId}_url${fileUrl.split(".com")[1].replace(/^\/+/, '')}`;
     const snsPublishParams = {
       TopicArn: topicArn,
       Message: message,
@@ -205,7 +174,6 @@ app.post('/api/upload', upload.single('file') , async (req, res) => {
     res.status(500).json({ success: false, message: 'The file upload has failed' });
   }
 });
-
 
 
 
@@ -224,7 +192,7 @@ const emailSubscribedToTopic = async (topicArn, email) => {
     throw error;
   }
 };
-const OnTopicCreation = async (topicName) => {
+const createTopic = async (topicName) => {
   try {
     const params = {
       Name: topicName,
@@ -242,7 +210,7 @@ app.post('/api/subscriptions/send', async(req, res) => {
   const emails = req.body;
 
   try {
-    const topicArn = await OnTopicCreation('smalempatopic');
+    const topicArn = await createTopic('smalempatopic');
     const subscriptionPromises = emails.map(async (email) => {
       const confirmationUrl = await emailSubscribedToTopic(topicArn, email);
       return confirmationUrl;
@@ -279,7 +247,7 @@ app.post('/api/count', async(req, res) => {
   
 })
 
-const PORT = 4500; 
+const PORT = 3000; 
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
