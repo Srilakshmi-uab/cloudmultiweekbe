@@ -86,7 +86,7 @@ const updateCount = async (id, url) => {
   const selectSql = 'SELECT emails, id, count FROM fileclickcount WHERE id = ?';
   console.log(id, 'count')
   try {
-    const rows = await pool.query(selectSql, [id]);
+    const [rows] = await pool.query(selectSql, [id]);
     console.log(rows, 'rowsrowsrows')
     if (rows.length === 0) {
       console.log('No data found for the given ID.');
@@ -197,7 +197,7 @@ app.post('/api/upload', upload.single('file') , async (req, res) => {
       },
     });
 
-    const message = 'Please click on the link provided to download your file:'+ `http://localhost:4200/fetch/id=${randomId}_url${fileUrl.split(".com")[1].replace(/^\/+/, '')}`;
+    const message = 'Please click on the link provided to download your file:'+ `http://3.135.206.171/fetch/id=${randomId}_url${fileUrl.split(".com")[1].replace(/^\/+/, '')}`;
     const snsPublishParams = {
       TopicArn: topicArn,
       Message: message,
