@@ -121,7 +121,7 @@ app.post('/api/countClicks', async (req, res) => {
 });
 
 
-const PORT = 4500; 
+const PORT = 4600; 
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
