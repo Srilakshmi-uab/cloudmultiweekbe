@@ -69,16 +69,20 @@ const updateClick = async (id, url) => {
 
     const row = rows[0];
     const emailCount = row.emails.split(',').length;
+    if(emailCount == row.clicks){
+    delete_file_if_file_exceeds(url)
+    }
     if (emailCount > row.clicks) {
       const updateSql = 'UPDATE file_clicks SET clicks = clicks + 1 WHERE id = ?';
       await pool.query(updateSql, [id]);
       console.log('Click updated successfully.');
       return true;
-    } else {
-      delete_file_if_file_exceeds(url)
+    }else {
+    
       console.log('Cannot update click. Click limit reached.');
       return false;
     }
+    
   } catch (error) {
     console.error('Error while updating click:', error);
     return false;

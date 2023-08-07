@@ -23,7 +23,6 @@ const getSubscribedUsers = async (topicArn) => {
   try {
     const { SNSClient, ListSubscriptionsByTopicCommand } = require("@aws-sdk/client-sns");
    let { accessKeyId,secretAccessKey} = awsAcessObj
-   console.log(accessKeyId, secretAccessKey, '===================')
     const snsClient = new SNSClient({
       region: "us-east-2",
       credentials: { accessKeyId,secretAccessKey},
