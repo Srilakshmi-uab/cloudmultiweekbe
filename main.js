@@ -24,8 +24,9 @@ function delete_file_if_file_exceeds(url){
         const s3 = new aws.S3();
         const filePathUrl = url;
         const urlParts = filePathUrl.split('/');
-        const objectKey = urlParts[urlParts.length -1];
-        const headParams = {
+        let objectKey = urlParts[urlParts.length -1];
+       objectKey = objectKey.replace('%20', ' ')
+       const headParams = {
           Bucket: bucket_name,
           Key: objectKey,
         };
@@ -33,7 +34,7 @@ function delete_file_if_file_exceeds(url){
           if (err) {
             if (err.code === 'NoSuchKey') {
               console.log('File does not exist.');
-            } else {
+            } else {  
               console.error('Error checking file existence:', err);
             }
           } else {
@@ -50,7 +51,7 @@ function delete_file_if_file_exceeds(url){
               if (deleteErr) {
                 console.error('Error deleting file:', deleteErr);
               } else {
-                console.log('File deleted successfully:', deleteData);
+                 console.log('File deleted successfully:', deleteData);
               }
             });
           }
@@ -69,16 +70,17 @@ const updateClick = async (id, url) => {
 
     const row = rows[0];
     const emailCount = row.emails.split(',').length;
-    if(emailCount == row.clicks){
-    delete_file_if_file_exceeds(url)
+    if((emailCount -1 )== row.clicks){
+      delete_file_if_file_exceeds(url)
     }
+    console.log('hghg')
     if (emailCount > row.clicks) {
       const updateSql = 'UPDATE file_clicks SET clicks = clicks + 1 WHERE id = ?';
       await pool.query(updateSql, [id]);
       console.log('Click updated successfully.');
       return true;
     }else {
-    
+      
       console.log('Cannot update click. Click limit reached.');
       return false;
     }

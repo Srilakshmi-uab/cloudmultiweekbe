@@ -6,8 +6,8 @@ const bucket_name = 'smaremal'
 const lamdaFunName = 'smaremal'
 const topicName = 'smaremal'
 let awsAcessObj = {
-  accessKeyId: 'AKIA4WNIZPNFJJPFOPN5',   
-  secretAccessKey: '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', 
+   accessKeyId: 'AKIA4WNIZPNFFJXFIUVX',   
+  secretAccessKey: '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',
   region: 'us-east-2',             
 } 
 aws.config.update(awsAcessObj);
