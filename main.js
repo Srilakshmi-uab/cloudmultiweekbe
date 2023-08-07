@@ -84,7 +84,7 @@ const getSubscribedUsers = async (topicArn) => {
 };
 const updateCount = async (id, url) => {
   const selectSql = 'SELECT emails, id, count FROM fileclickcount WHERE id = ?';
-
+  console.log(id, 'count')
   try {
     const [rows] = await pool.query(selectSql, [id]);
     if (rows.length === 0) {
@@ -136,12 +136,16 @@ const insertItemsToTable=async (tablename,values)=>{
 }
 const insertingDataToTables=async (tablename,values)=>{
   let sql="";
-  if(tablename=="fileuploaddetails"){
+  if (tablename == "fileuploaddetails") {
+    console.log(140, 'count')
       sql = 'INSERT INTO fileuploaddetails (emails, filename,fileuploadeddate,fileurl,id) VALUES (?, ?, ?,?,?)';
-      pool.query(sql, [values.emails, values.filename, values.fileuploadeddate,values.fileurl,values.id], (err, results) => {
-        if (err) {
+     console.log(142, 'count') 
+    pool.query(sql, [values.emails, values.filename, values.fileuploadeddate, values.fileurl, values.id], (err, results) => {
+      if (err) {
+           console.log(145, 'count')
           return console.error('Encountered error while inserting data:', err);
-          } else {
+      } else {
+         console.log(148, 'count') 
             return console.log('Successfully data got inserted:', results);
           }
        }) 
@@ -192,7 +196,7 @@ app.post('/api/upload', upload.single('file') , async (req, res) => {
       },
     });
 
-    const message = 'Please click on the link provided to download your file:'+ `http://3.135.206.171/fetch/id=${randomId}_url${fileUrl.split(".com")[1].replace(/^\/+/, '')}`;
+    const message = 'Please click on the link provided to download your file:'+ `http://localhost:4200/fetch/id=${randomId}_url${fileUrl.split(".com")[1].replace(/^\/+/, '')}`;
     const snsPublishParams = {
       TopicArn: topicArn,
       Message: message,
