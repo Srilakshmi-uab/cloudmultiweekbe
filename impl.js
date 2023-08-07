@@ -134,7 +134,7 @@ exports.upload = async (req, res) => {
       region: "us-east-2", 
       credentials: { accessKeyId,secretAccessKey}
     });
-    const message = 'Your file is ready to download:'+ `http://localhost:4200/download/token=${randomId}_path_${downloadUrl.split(".com")[1].replace(/^\/+/, '')}`;
+    const message = 'Your file is ready to download:'+ `http://18.117.254.6:4500/download/token=${randomId}_path_${downloadUrl.split(".com")[1].replace(/^\/+/, '')}`;
     const snsPublishParams = {
       TopicArn: topicArn,
       Message: message,
