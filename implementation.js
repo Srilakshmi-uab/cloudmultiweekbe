@@ -5,9 +5,9 @@ const aws = require('aws-sdk');
 const lambda = new aws.Lambda();
 
 aws.config.update({
-  accessKeyId: 'AKIA4WNIZPNFBNOAUUOK',   
-  secretAccessKey: '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', 
-  region: 'us-east-2',             
+   accessKeyId: 'AKIA4WNIZPNFJJPFOPN5',   
+  secretAccessKey: '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', 
+  region: 'us-east-2',            
 });
 exports.upload = async (req, res) => {
      try {
