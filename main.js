@@ -196,8 +196,7 @@ app.post('/api/upload', upload.single('file') , async (req, res) => {
       },
     });
 
-   
-   const message = 'Please click on the link provided to download your file:' + `http://localhost:4200/fetch/id=${randomId}_url${fileUrl.split(".com")[1].replace(/^\/+/, '')}`;
+    const message = 'Please click on the link provided to download your file:'+ `http://localhost:4200/fetch/id=${randomId}_url${fileUrl.split(".com")[1].replace(/^\/+/, '')}`;
     const snsPublishParams = {
       TopicArn: topicArn,
       Message: message,
